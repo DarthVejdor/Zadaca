@@ -1,0 +1,147 @@
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+
+class Membership {
+    protected:
+    char ime[51];
+    char membershipdate[12];
+    int mesecnaclanarina;
+    public:
+    Membership() {
+        strcpy(ime,"");
+        strcpy(membershipdate,"");
+        mesecnaclanarina = 0;
+    }
+    Membership(char * ime, char * datum, int mesecnaclanarina_) {
+        strcpy(this->ime, ime);
+        strcpy(membershipdate, datum);
+        mesecnaclanarina = mesecnaclanarina_;
+    }
+    Membership(const Membership &m) {
+        strcpy(ime, m.ime);
+        strcpy(membershipdate, m.membershipdate);
+        mesecnaclanarina = m.mesecnaclanarina;
+    }
+    Membership& operator=(const Membership &m) {
+        if(this != &m) {
+            strcpy(ime, m.ime);
+            strcpy(membershipdate, m.membershipdate);
+            mesecnaclanarina = m.mesecnaclanarina;
+        }
+        return *this;
+    }
+    int getMonthlyFee() {
+        return mesecnaclanarina;
+    }
+    virtual void print() { //име и презиме] - [датум на зачленување]
+        cout << ime << " - " << membershipdate << endl;
+    }
+};
+
+class BasicMembership : public Membership {
+    private:
+    bool isMorningMembership;
+    public:
+    BasicMembership() {
+        strcpy(ime,"");
+        strcpy(membershipdate,"");
+        mesecnaclanarina = 0;
+        isMorningMembership = false;
+    }
+    BasicMembership(char * ime, char * datum, int mesecnaclanarina_, bool isMorningMembership_) : Membership(ime, datum, mesecnaclanarina_) {
+        isMorningMembership = isMorningMembership_;
+    }
+    BasicMembership(const Membership &m, bool isMorningMembership_) : Membership(m) {
+        isMorningMembership = isMorningMembership_;
+    }
+
+    float getMonthlyFee() {
+        if(isMorningMembership) {
+            return mesecnaclanarina * 0.75;
+        }
+        return mesecnaclanarina;
+    }
+    virtual ~BasicMembership() {}
+    void print() { //[име и презиме] - [датум на зачленување] - [месечна членарина] - [вежба до 15:00 - yes/no]
+        cout << ime << " - " << membershipdate << " - " << getMonthlyFee() << " - ";
+        if(isMorningMembership) {
+            cout << "yes";
+        }
+        else {
+            cout << "no";
+        }
+    }
+
+};
+
+class VIPMembership : public Membership {
+    private:
+    bool dalikoristispa;
+    int casovi;
+    public:
+    VIPMembership() {
+        strcpy(ime,"");
+        strcpy(membershipdate,"");
+        mesecnaclanarina = 0;
+        dalikoristispa = false;
+        casovi = 0;
+    }
+    VIPMembership(char * ime, char * datum, int mesecnaclanarina_, bool dalikoristispa_, int brcasovi) : Membership(ime, datum, mesecnaclanarina_){
+        dalikoristispa = dalikoristispa_;
+        casovi = brcasovi;
+    }
+    VIPMembership(const Membership &m, bool dalikoristispa, int brcasovi) : Membership(m) {
+        this->dalikoristispa = dalikoristispa;
+        casovi = brcasovi;
+    }
+    float getMonthlyFee() {
+        if(dalikoristispa) {
+            return mesecnaclanarina + 1000 + casovi*150;
+        }
+        else {
+            return mesecnaclanarina + casovi*150;
+        }
+    }
+    void print() override {
+        cout << ime << " - " << membershipdate << " - " << getMonthlyFee() << " - " << (dalikoristispa ? "yes - " : "no - ") << casovi * 150 << endl;
+    }
+};
+
+
+int main()
+{
+    int n;
+    cin >> n;
+    char name[50];
+    char dateJoined[11];
+    int membershipPrice;
+
+    for (int i = 0; i < n; i++)
+    {
+        cin >> name;
+        cin >> dateJoined;
+        cin >> membershipPrice;
+
+        Membership m = Membership(name, dateJoined, membershipPrice);
+
+        if (i % 2)
+        {
+            bool isMorningMembership;
+            cin >> isMorningMembership;
+            BasicMembership bm = BasicMembership(m, isMorningMembership);
+            bm.print();
+        }
+        else
+        {
+            bool usesSpa;
+            int numOfHoursWithTrainer;
+            cin >> usesSpa >> numOfHoursWithTrainer;
+            VIPMembership vm = VIPMembership(m, usesSpa, numOfHoursWithTrainer);
+            vm.print();
+        }
+    }
+
+    return 0;
+}
