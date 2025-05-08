@@ -1,0 +1,213 @@
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+
+class Scientist {
+    protected:
+    char * ime;
+    char institution[51];
+    int brojnatrudovi;
+    int brojnacitatiodtrudovi;
+    int godiniiskustvo;
+    public:
+    Scientist(const char * ime = "",const  char * institucija = "", int brtrudovi=0, int brcitati=0, int godiskustvo=0) {
+        this->ime = new char[strlen(ime) + 1];
+        strcpy(this->ime, ime);
+        strcpy(institution, institucija);
+        brojnatrudovi = brtrudovi;
+        brojnacitatiodtrudovi = brcitati;
+        godiniiskustvo = godiskustvo;
+    }
+    Scientist(const Scientist & s) {
+        ime = new char[strlen(s.ime) + 1];
+        strcpy(ime, s.ime);
+        strcpy(institution, s.institution);
+        brojnatrudovi = s.brojnatrudovi;
+        brojnacitatiodtrudovi = s.brojnacitatiodtrudovi;
+        godiniiskustvo = s.godiniiskustvo;
+    }
+    virtual ~Scientist() {
+        delete [] ime;
+    }
+    Scientist & operator=(const Scientist & s) {
+        if(this == &s) {
+            return *this;
+        }
+        else {
+            delete [] this->ime;
+            ime = new char[strlen(s.ime) + 1];
+            strcpy(ime, s.ime);
+            strcpy(institution, s.institution);
+            brojnatrudovi = s.brojnatrudovi;
+            brojnacitatiodtrudovi = s.brojnacitatiodtrudovi;
+            godiniiskustvo = s.godiniiskustvo;
+        }
+        return *this;
+    }
+    virtual double impact() {
+        return brojnacitatiodtrudovi * 0.5 + brojnatrudovi * 0.3 + godiniiskustvo*0.2;
+    }
+    virtual void print() {
+        cout << ime << " - " << institution << endl
+        << "Publications: " << brojnatrudovi << endl
+        << "Citations: " << brojnacitatiodtrudovi << endl
+        << "Experience (Years): " << godiniiskustvo << endl
+        << "Impact Score: " << impact() << endl;
+    }
+};
+
+class ResearchScientist : public Scientist {
+private:
+    int brtrudovivospisanija;
+    int finansiraniproekti;
+    double suma;
+    public:
+    ResearchScientist(const char * ime = "", const char * institucija = "", int brtrudovi=0, int brcitati=0, int godiskustvo=0, int brtrudovivospisanie=0, int finansiraniproekti=0, double sumanapari=0.0)
+        :Scientist(ime, institucija, brtrudovi, brcitati, godiskustvo) {
+        brtrudovivospisanija=brtrudovivospisanie;
+        this->finansiraniproekti=finansiraniproekti;
+        suma=sumanapari;
+    }
+    ResearchScientist(const ResearchScientist & s) : Scientist(s) {
+        brtrudovivospisanija = s.brtrudovivospisanija;
+        finansiraniproekti = s.finansiraniproekti;
+        suma = s.suma;
+    }
+    ResearchScientist& operator=(const ResearchScientist & s) {
+        if (this != &s) {
+            Scientist::operator=(s);  // Call base class assignment
+            brtrudovivospisanija = s.brtrudovivospisanija;
+            finansiraniproekti = s.finansiraniproekti;
+            suma = s.suma;
+        }
+        return *this;
+    }
+    virtual ~ResearchScientist() {}
+    virtual double researchImpact() {
+        return brtrudovivospisanija * 0.4 + finansiraniproekti * 0.2 + suma/10000 * 0.4;
+    }
+    double impact() override {
+        return (Scientist::impact() + researchImpact()) / 2;
+    }
+    void print() override  {
+        Scientist::print();
+        cout << "Q1 Publications: " << brtrudovivospisanija << endl
+        << "EU Projects: " << finansiraniproekti << endl
+        << "Total Funding: " << suma << " EUR" << endl
+        << "Research Impact: " << researchImpact() << endl
+        << "Overall Impact: " << impact() << endl;
+    }
+};
+
+void printHighestImpact(Scientist* scientists, int count) {
+    double maks=0;
+    int indeks=0;
+    for(int i = 0; i < count; i++) {
+        if(scientists[i].impact() > maks) {
+            maks = scientists[i].impact();
+            indeks = i;
+        }
+    }
+    cout << "Scientist with the Highest Impact:" << endl;
+    scientists[indeks].print();
+}
+
+int main() {
+    int n;
+    cin >> n;
+
+    if (n == 1) {
+        // Test Scientist (Basic)
+        int numScientists;
+        cin >> numScientists;
+
+        Scientist* scientists = new Scientist[numScientists];
+
+        for (int i = 0; i < numScientists; ++i) {
+            char name[100], institution[50];
+            int publications, citations, years;
+            cin >> name >> institution >> publications >> citations >> years;
+
+            scientists[i] = Scientist(name, institution, publications, citations, years);
+        }
+
+        cout << "SCIENTISTS:" << endl;
+        cout << "=====================================" << endl;
+        for (int i = 0; i < numScientists; ++i) {
+            scientists[i].print();
+            cout << "-------------------------" << endl;
+        }
+
+        // Copy Constructor Test
+        cout << "Testing Copy Constructor:" << endl;
+        Scientist copiedScientist = scientists[0];
+        copiedScientist.print();
+
+        // Assignment Operator Test
+        cout << "Testing Assignment Operator:" << endl;
+        Scientist assignedScientist;
+        assignedScientist = scientists[1];
+        assignedScientist.print();
+
+        delete[] scientists;
+    }
+    else if (n == 2) {
+        // Test ResearchScientist
+        int numScientists;
+        cin >> numScientists;
+
+        ResearchScientist* scientists = new ResearchScientist[numScientists];
+
+        for (int i = 0; i < numScientists; ++i) {
+            char name[100], institution[50];
+            int publications, citations, years, Q1publications, EUprojects;
+            double funding;
+
+            cin >> name >> institution >> publications >> citations >> years;
+            cin >> Q1publications >> EUprojects >> funding;
+
+            scientists[i] = ResearchScientist(name, institution, publications, citations, years, Q1publications, EUprojects, funding);
+        }
+
+        cout << "RESEARCH SCIENTISTS:" << endl;
+        cout << "=====================================" << endl;
+        for (int i = 0; i < numScientists; ++i) {
+            scientists[i].print();
+            cout << "-------------------------" << endl;
+        }
+
+        // Copy Constructor Test
+        cout << "Testing Copy Constructor:" << endl;
+        ResearchScientist copiedResearchScientist = scientists[0];
+        copiedResearchScientist.print();
+
+        // Assignment Operator Test
+        cout << "Testing Assignment Operator:" << endl;
+        ResearchScientist assignedResearchScientist;
+        assignedResearchScientist = scientists[1];
+        assignedResearchScientist.print();
+
+        delete[] scientists;
+    }
+    else if (n == 3) {
+        // Test printing scientist with highest impact
+        int numScientists;
+        cin >> numScientists;
+
+        Scientist* scientists = new Scientist[numScientists];
+
+        for (int i = 0; i < numScientists; ++i) {
+            char name[100], institution[50];
+            int publications, citations, years;
+            cin >> name >> institution >> publications >> citations >> years;
+
+            scientists[i] = Scientist(name, institution, publications, citations, years);
+        }
+
+        printHighestImpact(scientists, numScientists);
+        delete[] scientists;
+    }
+
+    return 0;
+}
