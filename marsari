@@ -1,0 +1,63 @@
+.data
+A:	.word 11, 12, 3, 4, 5, 6, 7, 8, 9, 10 
+golemina:	.word 10
+rezultat:	.ascii "Prosek: "
+
+.text
+main:
+	la $s0, A
+	lw $s1, golemina
+	li $t0, 0	#sumata od brojojte
+	li $t1, 0	#kolku validni broevi
+	li $t2, 0	#brojaco[i]
+	li $a1, 1
+	li $t5, 2	#dvojkata za modul
+	li $t6, 4	#cetvorkata za modul
+ciklus:
+	beq $t2, $s1, presmetka
+	lw $t3, ($s0)
+	
+	# Проверка за деливост со 2 (со делење)
+	# Проверка за деливост со 2 (делење)
+    	div $t3, $t5
+    	mfhi $s6                # $s6 = остаток од делењето со 2
+    	beq $s6, 0, proveri_4   # Ако е делив со 2, провери за 4
+
+	addi $s0, $s0, 4
+	addi $t2, $t2, 1
+	j ciklus
+	
+proveri_4:
+	div $t3, $t6
+   	mfhi $s7
+    	bne $s7, 0, dodavanje  # ако не е делив со 4 → додај го
+    	
+    	# ако е делив со 4 → не го додавај, оди на следниот
+	addi $s0, $s0, 4
+	addi $t2, $t2, 1
+	j ciklus
+
+
+	
+dodavanje:	
+add $t0, $t3, $t0
+add $t1, $a1, $t1
+addi $s0, $s0, 4
+addi $t2, $t2, 1
+j ciklus
+
+	
+presmetka:
+	div $t0, $t1
+	mflo $a3
+	li $v0, 4
+	la $a0, rezultat
+	syscall
+	li $v0, 1
+	move $a0, $a3
+	syscall
+	li $v0, 10
+	syscall
+	
+	
+	
